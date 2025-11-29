@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  flask-app:
+    build: .
+    container_name: music-dating-backend
+    ports:
+      - "5001:5001"
+    env_file:
+      - .env
+    environment:
+      - FLASK_ENV=development
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
