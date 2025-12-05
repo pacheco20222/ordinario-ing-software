@@ -42,14 +42,16 @@ def create_app():
     from app.routes.auth import auth_bp
     from app.routes.profile import profile_bp
     from app.routes.playlist import playlist_bp
+    from app.routes.discover import discover_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(profile_bp, url_prefix='/api/profile')
     app.register_blueprint(playlist_bp, url_prefix='/api/playlist')
+    app.register_blueprint(discover_bp, url_prefix='/api/discover')
     
     @app.route('/')
     def health_check():
-        return {'status': 'ok', 'message': 'Music Dating App Backend API'}, 200
+        return {'status': 'ok', 'message': 'Heartbeat Dating App Backend API'}, 200
     
     return app
 
@@ -58,5 +60,5 @@ def create_app():
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    app.run(debug=True, host='0.0.0.0', port=Config.PORT)
 
