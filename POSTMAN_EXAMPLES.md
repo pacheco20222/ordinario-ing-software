@@ -186,6 +186,162 @@ Content-Type: application/json
 }
 ```
 
+## 7. Get Random User (Protected)
+
+**GET** `/api/discover/user`
+
+**Headers:**
+```
+Authorization: Bearer <your_token_here>
+Content-Type: application/json
+```
+
+**Expected Response (200):**
+```json
+{
+  "_id": "507f1f77bcf86cd799439022",
+  "email": "anotheruser@example.com",
+  "favorite_songs": ["Song A", "Song B"],
+  "favorite_artists": ["Artist A", "Artist B"],
+  "favorite_genres": ["Pop", "Indie"],
+  "spotify_username": "another_spotify_user",
+  "created_at": "2024-01-01T00:00:00",
+  "updated_at": "2024-01-01T00:00:00"
+}
+```
+
+**Note:** This endpoint returns a random user profile excluding the current authenticated user. Used for discovering potential matches in the dating app.
+
+## 8. Swipe Right (Protected)
+
+**POST** `/api/discover/swipe-right`
+
+**Headers:**
+```
+Authorization: Bearer <your_token_here>
+Content-Type: application/json
+```
+
+**Body:**
+```json
+{
+  "user_id": "507f1f77bcf86cd799439022"
+}
+```
+
+**Expected Response (201) - New Swipe Right:**
+```json
+{
+  "message": "Swipe right recorded",
+  "swipe": {
+    "_id": "507f1f77bcf86cd799439030",
+    "user_id": "507f1f77bcf86cd799439011",
+    "swiped_user_id": "507f1f77bcf86cd799439022",
+    "created_at": "2024-01-01T00:00:00"
+  }
+}
+```
+
+**Expected Response (201) - Match Created (mutual swipe right):**
+```json
+{
+  "message": "It's a match!",
+  "match": {
+    "_id": "507f1f77bcf86cd799439040",
+    "user_id_1": "507f1f77bcf86cd799439011",
+    "user_id_2": "507f1f77bcf86cd799439022",
+    "created_at": "2024-01-01T00:00:00"
+  },
+  "is_new_match": true
+}
+```
+
+**Expected Response (200) - Swipe Already Exists:**
+```json
+{
+  "message": "Swipe right already recorded",
+  "swipe": {
+    "_id": "507f1f77bcf86cd799439030",
+    "user_id": "507f1f77bcf86cd799439011",
+    "swiped_user_id": "507f1f77bcf86cd799439022",
+    "created_at": "2024-01-01T00:00:00"
+  }
+}
+```
+
+**Expected Response (200) - Match Already Exists:**
+```json
+{
+  "message": "Match already exists",
+  "match": {
+    "_id": "507f1f77bcf86cd799439040",
+    "user_id_1": "507f1f77bcf86cd799439011",
+    "user_id_2": "507f1f77bcf86cd799439022",
+    "created_at": "2024-01-01T00:00:00"
+  },
+  "is_new_match": false
+}
+```
+
+**Note:** This endpoint records a swipe right action. If the swiped user previously swiped right on the current user, a match is created instead of storing the swipe. The `user_id` in the body is the ID of the user being swiped right on (from the `/api/discover/user` endpoint).
+
+## 9. Get User Matches (Protected)
+
+**GET** `/api/discover/matches`
+
+**Headers:**
+```
+Authorization: Bearer <your_token_here>
+Content-Type: application/json
+```
+
+**Expected Response (200):**
+```json
+{
+  "matches": [
+    {
+      "match_id": "507f1f77bcf86cd799439040",
+      "matched_user": {
+        "_id": "507f1f77bcf86cd799439022",
+        "email": "anotheruser@example.com",
+        "favorite_songs": ["Song A", "Song B"],
+        "favorite_artists": ["Artist A", "Artist B"],
+        "favorite_genres": ["Pop", "Indie"],
+        "spotify_username": "another_spotify_user",
+        "created_at": "2024-01-01T00:00:00",
+        "updated_at": "2024-01-01T00:00:00"
+      },
+      "created_at": "2024-01-01T00:00:00"
+    },
+    {
+      "match_id": "507f1f77bcf86cd799439041",
+      "matched_user": {
+        "_id": "507f1f77bcf86cd799439023",
+        "email": "user3@example.com",
+        "favorite_songs": ["Song X", "Song Y"],
+        "favorite_artists": ["Artist X"],
+        "favorite_genres": ["Rock"],
+        "spotify_username": "user3_spotify",
+        "created_at": "2024-01-01T00:00:00",
+        "updated_at": "2024-01-01T00:00:00"
+      },
+      "created_at": "2024-01-01T01:00:00"
+    }
+  ],
+  "count": 2
+}
+```
+
+**Expected Response (200) - No matches:**
+```json
+{
+  "matches": [],
+  "count": 0
+}
+```
+
+**Note:** This endpoint returns all matches for the authenticated user. Each match includes the match ID, the full profile information of the matched user, and when the match was created. Matches are sorted by most recent first.
+
 ## Error Responses
 
 All errors follow this format:
@@ -215,10 +371,38 @@ All errors follow this format:
 }
 ```
 
+```json
+{
+  "error": "user_id is required",
+  "status_code": 400
+}
+```
+
+```json
+{
+  "error": "Cannot swipe right on yourself",
+  "status_code": 400
+}
+```
+
 **404 Not Found:**
 ```json
 {
   "error": "User not found",
+  "status_code": 404
+}
+```
+
+```json
+{
+  "error": "No other users found",
+  "status_code": 404
+}
+```
+
+```json
+{
+  "error": "Swiped user not found",
   "status_code": 404
 }
 ```

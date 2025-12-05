@@ -80,6 +80,30 @@ class User:
         return result
     
     @staticmethod
+    def find_random_user(exclude_user_id):
+        """
+        Find a random user excluding the specified user
+        Args:
+            exclude_user_id: User ID to exclude (ObjectId or string)
+        Returns:
+            User document or None
+        """
+        collection = User.get_collection()
+        if isinstance(exclude_user_id, str):
+            exclude_user_id = ObjectId(exclude_user_id)
+        
+        # Use aggregation pipeline to get a random user excluding the current user
+        pipeline = [
+            {'$match': {'_id': {'$ne': exclude_user_id}}},
+            {'$sample': {'size': 1}}
+        ]
+        
+        result = list(collection.aggregate(pipeline))
+        if result:
+            return result[0]
+        return None
+    
+    @staticmethod
     def to_dict(user_doc):
         """
         Convert user document to dictionary, excluding password
